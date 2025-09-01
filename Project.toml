@@ -1,0 +1,13 @@
+name = "PolyCalc"
+uuid = "000d314d-2884-4564-a2fe-4d1ef7df695b"
+authors = ["Harrison Wills"]
+version = "1.0.0-DEV"
+
+[compat]
+julia = "1.6.7"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
