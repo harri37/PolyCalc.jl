@@ -3,7 +3,11 @@ uuid = "000d314d-2884-4564-a2fe-4d1ef7df695b"
 authors = ["Harrison Wills"]
 version = "1.0.0-DEV"
 
+[deps]
+MultivariatePolynomials = "102ac46a-7ee4-5c85-9060-abc95bfdeaa3"
+
 [compat]
+MultivariatePolynomials = "0.5.10"
 julia = "1.6.7"
 
 [extras]
