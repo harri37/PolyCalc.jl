@@ -1,6 +1,6 @@
 include("constants.jl")
 
-struct RecursiveDensePolynomial{T} <: AbstractPolynomial{T}
+struct RecursiveDensePolynomial{T}
     variable::String
     coeffs::Vector{RecursiveDensePolynomial{T}}
     isconst::Bool
@@ -11,76 +11,42 @@ struct RecursiveDensePolynomial{T} <: AbstractPolynomial{T}
     end
 end
 
-function show(io::IO, ::MIME"text/plain", p::RecursiveDensePolynomial{T}) where T
-    # Handle constant polynomials
-    if p.isconst
-        print(io, p.constvalue)
-        return
-    end
-
-    # Handle empty coefficient list (should be zero)
-    if isempty(p.coeffs)
-        print(io, "0")
-        return
-    end
-
-    first_term = true
-    for (i, coeff) in enumerate(p.coeffs)
-        # Skip zero coefficients (check if coefficient polynomial represents zero)
-        if coeff.isconst && coeff.constvalue == 0
-            continue
+function expanded_form(poly::RecursiveDensePolynomial{T})::String where T
+    if poly.isconst
+        if poly.constvalue == one(T)
+            return ""
         end
+        return string(poly.constvalue)
+    end
+    terms = String[]
+    for (i, coeff) in enumerate(poly.coeffs)
+        exp_str = ""
+        if i > 2
+            for c in string(i - 1)
+                digit = parse(Int, c)
+                exp_str *= EXPONENT_UNICODES[digit]
 
-        if !first_term
-            print(io, " + ")
-        end
-
-        # Handle the coefficient
-        if coeff.isconst
-            # Coefficient is a constant
-            if coeff.constvalue == 1 && i > 1
-                # Don't print coefficient 1 for non-constant terms
-            elseif coeff.constvalue == -1 && i > 1
-                if first_term
-                    print(io, "-")
-                else
-                    print(io, " - ")
-                end
-            else
-                print(io, coeff.constvalue)
             end
+        end
+        push!(terms, expanded_form(coeff) * (i > 1 ? "$(poly.variable)$exp_str" : ""))
+    end
+    terms = filter(t -> !startswith(t, "0"), terms)
+    result = ""
+    for term in terms
+        if isempty(result)
+            result *= term
+        elseif startswith(term, "-")
+            result *= " - " * lstrip(term, '-')
         else
-            # Coefficient is a polynomial - wrap in parentheses
-            print(io, "(")
-            show(io, MIME"text/plain"(), coeff)
-            print(io, ")")
+            result *= " + " * term
         end
-
-        # Add variable and exponent for non-constant terms
-        if i > 1
-            print(io, p.variable)
-            if i > 2  # Only add exponent for degree > 1
-                exponent_string = ""
-                for c in string(i - 1)
-                    digit = parse(Int, c)
-                    if digit + 1 <= length(EXPONENT_UNICODES)
-                        exponent_string *= EXPONENT_UNICODES[digit]
-                    else
-                        exponent_string *= "^$(i-1)"  # Fallback for large exponents
-                        break
-                    end
-                end
-                print(io, exponent_string)
-            end
-        end
-
-        first_term = false
     end
+    return result
+end
 
-    # Handle case where all coefficients were zero
-    if first_term
-        print(io, "0")
-    end
+
+function show(io::IO, ::MIME"text/plain", p::RecursiveDensePolynomial{T}) where T
+    print(io, expanded_form(p))
 end
 
 function zero(::Type{RecursiveDensePolynomial{T}}) where T

@@ -2,5 +2,8 @@ using PolyCalc
 using Test
 
 @testset "PolyCalc.jl" begin
-    # Write your tests here.
+    
+    coeff_type = Int
+    
+    test_poly::RecursiveDensePolynomial{coeff_type} = RecursiveDensePolynomial("x", [], false, zero(coeff_type))
 end
